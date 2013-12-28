@@ -43,6 +43,8 @@ public class RealExample {
 
         update(benji)
             .value(Person::getFirstName)
+            .where(Person::getLastName)
+            .equalTo("weber")
             .execute(this::openConnection);
 
         Mapper<Person> personMapper = Mapper.mapper(Person::new)

@@ -1,8 +1,6 @@
 package uk.co.benjiweber.benjiql.mocking;
 
 
-import uk.co.benjiweber.benjiql.mocking.RecordingObject;
-
 public class Recorder<T> {
 
     private T t;

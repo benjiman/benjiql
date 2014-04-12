@@ -1,6 +1,7 @@
 package uk.co.benjiweber.benjiql.update;
 
 import com.google.common.base.Joiner;
+import uk.co.benjiweber.benjiql.ddl.JoinTables;
 import uk.co.benjiweber.benjiql.util.Conventions;
 import uk.co.benjiweber.benjiql.mocking.Recorder;
 import uk.co.benjiweber.benjiql.mocking.RecordingObject;
@@ -26,6 +27,10 @@ public class Delete<T> {
 
     public static <T> Delete<T> delete(Class<T> cls) {
         return new Delete<T>(cls);
+    }
+
+    public static <T,U> DeleteJoin<T,U> delete(JoinTables<T, U> join) {
+        return new DeleteJoin<T,U>(join.leftTable, join.rightTable);
     }
 
     public <U> DeleteComparison<T,U> and(Function<T,U> getter) {

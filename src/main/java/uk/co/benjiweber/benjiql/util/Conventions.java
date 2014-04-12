@@ -64,6 +64,10 @@ public class Conventions {
         return uncapitalize(toSnakeCase(banishGetterSetters(name)));
     }
 
+    public static String toDbJoinName(String name1, String name2) {
+        return toDbName(name1) + "_" + toDbName(name2);
+    }
+
     private static String banishGetterSetters(String name) {
         return name.replaceAll("^(get|set)", "");
     }

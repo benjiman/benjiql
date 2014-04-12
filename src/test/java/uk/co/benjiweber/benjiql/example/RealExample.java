@@ -11,6 +11,7 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static uk.co.benjiweber.benjiql.ddl.Create.create;
+import static uk.co.benjiweber.benjiql.ddl.Create.join;
 import static uk.co.benjiweber.benjiql.query.Select.from;
 import static uk.co.benjiweber.benjiql.update.Delete.delete;
 import static uk.co.benjiweber.benjiql.update.Upsert.insert;
@@ -63,6 +64,61 @@ public class RealExample {
         assertEquals("weber", result.get().getLastName());
         assertEquals((Integer)9, result.get().getFavouriteNumber());
     }
+
+    @Test public void example_of_select_with_join() throws SQLException {
+        create(Person.class)
+            .field(Person::getFirstName)
+            .field(Person::getLastName)
+            .field(Person::getFavouriteNumber)
+            .execute(this::openConnection);
+
+        create(Conspiracy.class)
+            .field(Conspiracy::getName)
+            .execute(this::openConnection);
+
+        create(join(Conspiracy.class, Person.class))
+            .fieldLeft(Conspiracy::getName)
+            .fieldRight(Person::getFirstName)
+            .fieldRight(Person::getLastName)
+            .execute(this::openConnection);
+
+        delete(Person.class)
+            .execute(this::openConnection);
+
+        delete(Conspiracy.class)
+            .execute(this::openConnection);
+
+        delete(join(Conspiracy.class, Person.class))
+            .execute(this::openConnection);
+
+        Person smith = new Person("agent","smith");
+        smith.setFavouriteNumber(6);
+
+        insert(smith)
+            .value(Person::getFirstName)
+            .value(Person::getLastName)
+            .value(Person::getFavouriteNumber)
+            .execute(this::openConnection);
+
+        Conspiracy nsa = new Conspiracy("nsa");
+        nsa.getMembers().add(smith);
+
+        insert(nsa)
+            .value(Conspiracy::getName)
+            .execute(this::openConnection);
+
+        nsa.getMembers().stream().forEach(agent -> {
+            insert(nsa, agent)
+                .valueLeft(Conspiracy::getName)
+                .valueRight(Person::getLastName)
+                .valueRight(Person::getFirstName)
+                .execute(this::openConnection);
+        });
+
+        // From Conspiracy.class where Conspiracy.getMembers.contains smith
+        // From join(Conspiracy.class, Person.class) where conspiracy.name = nsa and person.name ilike smith
+    }
+
 
     private Connection openConnection() {
         try {

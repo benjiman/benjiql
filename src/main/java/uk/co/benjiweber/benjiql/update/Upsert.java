@@ -8,6 +8,7 @@ import uk.co.benjiweber.benjiql.mocking.RecordingObject;
 import java.io.Serializable;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -44,7 +45,6 @@ public abstract class Upsert<T> {
                     + " SET " + Joiner.on(", ").join(setFieldNames.stream().map(fnv -> fnv.fieldName + " = ?").collect(Collectors.toList()))
                     + ((whereFieldNames.size() < 1) ? "" : " WHERE " + Joiner.on(" AND ").join(whereFieldNames.stream().map(fnv -> fnv.fieldName + " " + fnv.operator + " ?").collect(Collectors.toList())));
         }
-
     }
 
     @SuppressWarnings("unchecked")
@@ -55,6 +55,10 @@ public abstract class Upsert<T> {
 
     public static <T> Insert<T> insert(T value) {
         return new Insert<T>(value);
+    }
+
+    public static <T,U> InsertJoin<T,U> insert(T leftValue, U rightValue) {
+        return new InsertJoin<T, U>(leftValue, rightValue);
     }
 
     public static <T> Update<T> update(T value) {

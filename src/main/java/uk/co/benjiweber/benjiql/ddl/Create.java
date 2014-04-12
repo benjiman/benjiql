@@ -29,6 +29,15 @@ public class Create<T> {
         return new Create<T>(cls);
     }
 
+    public static <T,U> JoinTables<T,U> join(Class<T> leftTable, Class<U> rightTable) {
+        return new JoinTables<T, U>(leftTable, rightTable);
+    }
+
+
+    public static <T,U> CreateJoin<T,U> create(JoinTables<T,U> joinTables) {
+        return new CreateJoin<T, U>(joinTables.leftTable, joinTables.rightTable);
+    }
+
     public <U extends Serializable> Create<T> field(Function<T,U> getter) {
         U result = getter.apply(recorder.getObject());
         String fieldName = recorder.getCurrentPropertyName();

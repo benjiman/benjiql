@@ -8,7 +8,6 @@ import uk.co.benjiweber.benjiql.mocking.RecordingObject;
 import java.io.Serializable;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -57,8 +56,8 @@ public abstract class Upsert<T> {
         return new Insert<T>(value);
     }
 
-    public static <T,U> InsertJoin<T,U> insert(T leftValue, U rightValue) {
-        return new InsertJoin<T, U>(leftValue, rightValue);
+    public static <T,U> InsertRelationship<T,U> insert(T leftValue, U rightValue) {
+        return new InsertRelationship<T, U>(leftValue, rightValue);
     }
 
     public static <T> Update<T> update(T value) {

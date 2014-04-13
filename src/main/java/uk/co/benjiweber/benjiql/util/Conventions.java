@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.JDBCType;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Map;
 
 public class Conventions {
@@ -64,8 +65,17 @@ public class Conventions {
         return uncapitalize(toSnakeCase(banishGetterSetters(name)));
     }
 
-    public static String toDbJoinName(String name1, String name2) {
-        return toDbName(name1) + "_" + toDbName(name2);
+    public static String toDbName(Class<?>... clses) {
+        return Arrays.asList(clses)
+            .stream()
+            .map(Class::getSimpleName)
+            .map(Conventions::toDbName)
+            .reduce((a,b) -> a + "_" + b)
+            .orElse("");
+    }
+
+    public static String toJoinTableName(Class<?> cls, String name) {
+        return toDbName(cls.getSimpleName()) + "_" + toDbName(name);
     }
 
     private static String banishGetterSetters(String name) {

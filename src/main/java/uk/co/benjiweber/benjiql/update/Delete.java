@@ -29,8 +29,8 @@ public class Delete<T> {
         return new Delete<T>(cls);
     }
 
-    public static <T,U> DeleteJoin<T,U> delete(JoinTables<T, U> join) {
-        return new DeleteJoin<T,U>(join.leftTable, join.rightTable);
+    public static <T,U> DeleteFromRelationship<T,U> delete(JoinTables<T, U> join) {
+        return new DeleteFromRelationship<T,U>(join.leftTable, join.rightTable);
     }
 
     public <U> DeleteComparison<T,U> and(Function<T,U> getter) {

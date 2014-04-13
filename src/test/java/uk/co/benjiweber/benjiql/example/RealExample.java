@@ -11,7 +11,7 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static uk.co.benjiweber.benjiql.ddl.Create.create;
-import static uk.co.benjiweber.benjiql.ddl.Create.join;
+import static uk.co.benjiweber.benjiql.ddl.Create.relationship;
 import static uk.co.benjiweber.benjiql.query.Select.from;
 import static uk.co.benjiweber.benjiql.update.Delete.delete;
 import static uk.co.benjiweber.benjiql.update.Upsert.insert;
@@ -76,7 +76,7 @@ public class RealExample {
             .field(Conspiracy::getName)
             .execute(this::openConnection);
 
-        create(join(Conspiracy.class, Person.class))
+        create(relationship(Conspiracy.class, Person.class))
             .fieldLeft(Conspiracy::getName)
             .fieldRight(Person::getFirstName)
             .fieldRight(Person::getLastName)
@@ -88,7 +88,7 @@ public class RealExample {
         delete(Conspiracy.class)
             .execute(this::openConnection);
 
-        delete(join(Conspiracy.class, Person.class))
+        delete(relationship(Conspiracy.class, Person.class))
             .execute(this::openConnection);
 
         Person smith = new Person("agent","smith");
@@ -115,8 +115,16 @@ public class RealExample {
                 .execute(this::openConnection);
         });
 
+        delete(relationship(Conspiracy.class, Person.class))
+            .whereLeft(Conspiracy::getName)
+            .equalTo("nsa")
+            .andRight(Person::getLastName)
+            .equalTo("smith")
+            .execute(this::openConnection);
+
+
         // From Conspiracy.class where Conspiracy.getMembers.contains smith
-        // From join(Conspiracy.class, Person.class) where conspiracy.name = nsa and person.name ilike smith
+        // From relationship(Conspiracy.class, Person.class) where conspiracy.name = nsa and person.name ilike smith
     }
 
 

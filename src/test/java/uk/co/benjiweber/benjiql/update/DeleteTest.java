@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.co.benjiweber.benjiql.example.Conspiracy;
 import uk.co.benjiweber.benjiql.example.Person;
 
 import java.sql.Connection;
@@ -14,6 +15,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.co.benjiweber.benjiql.ddl.Create.relationship;
 import static uk.co.benjiweber.benjiql.update.Delete.delete;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -40,6 +42,17 @@ public class DeleteTest {
             .toSql();
 
         assertEquals("DELETE FROM person WHERE last_name = ? AND favourite_number = ? AND first_name LIKE ? AND first_name != ?", sql.trim());
+    }
+
+    @Test public void join_example() {
+        String sql = delete(relationship(Conspiracy.class, Person.class))
+                .whereLeft(Conspiracy::getName)
+                .equalTo("nsa")
+                .andRight(Person::getLastName)
+                .equalTo("smith")
+                .toSql();
+
+        assertEquals("DELETE FROM conspiracy_person WHERE conspiracy_name = ? AND person_last_name = ?", sql.trim());
     }
 
     @Test public void should_set_values() throws SQLException {

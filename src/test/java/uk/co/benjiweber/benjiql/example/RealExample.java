@@ -107,7 +107,7 @@ public class RealExample {
             .value(Conspiracy::getName)
             .execute(this::openConnection);
 
-        nsa.getMembers().stream().forEach(agent -> {
+        nsa.getMembers().forEach(agent -> {
             insert(nsa, agent)
                     .valueLeft(Conspiracy::getName)
                     .valueRight(Person::getLastName)

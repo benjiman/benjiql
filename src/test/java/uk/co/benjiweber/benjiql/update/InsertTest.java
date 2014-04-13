@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.co.benjiweber.benjiql.example.Conspiracy;
 import uk.co.benjiweber.benjiql.example.Person;
 
 import java.sql.Connection;
@@ -31,6 +32,19 @@ public class InsertTest {
             .toSql();
 
         assertEquals("INSERT INTO person (first_name, favourite_number) VALUES ( ?, ? )", sql.trim());
+    }
+
+    @Test public void join_example() {
+        Person smith = new Person("agent","smith");
+        Conspiracy nsa = new Conspiracy("nsa");
+
+        String sql = insert(nsa, smith)
+                .valueLeft(Conspiracy::getName)
+                .valueRight(Person::getLastName)
+                .valueRight(Person::getFirstName)
+                .toSql();
+
+        assertEquals("INSERT INTO conspiracy_person (conspiracy_name, person_last_name, person_first_name) VALUES ( ?, ?, ? )", sql.trim());
     }
 
     @Test public void should_set_values() throws SQLException {

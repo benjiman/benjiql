@@ -14,4 +14,8 @@ public class FieldNameValue<T> {
         this.value = value;
         this.operator = operator;
     }
+
+    public String toSQL() {
+        return fieldName + " " + operator + " ?";
+    }
 }

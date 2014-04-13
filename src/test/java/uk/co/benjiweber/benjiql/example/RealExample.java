@@ -109,11 +109,29 @@ public class RealExample {
 
         nsa.getMembers().stream().forEach(agent -> {
             insert(nsa, agent)
-                .valueLeft(Conspiracy::getName)
-                .valueRight(Person::getLastName)
-                .valueRight(Person::getFirstName)
-                .execute(this::openConnection);
+                    .valueLeft(Conspiracy::getName)
+                    .valueRight(Person::getLastName)
+                    .valueRight(Person::getFirstName)
+                    .execute(this::openConnection);
         });
+
+        Mapper<Person> personMapper = Mapper.mapper(Person::new)
+            .set(Person::setFirstName)
+            .set(Person::setLastName)
+            .set(Person::setFavouriteNumber);
+
+        Optional<Person> person = from(Person.class)
+            .where(Person::getLastName)
+            .equalTo("smith")
+            .join(relationship(Conspiracy.class, Person.class).invert())
+            .using(Person::getFirstName, Person::getLastName)
+            .join(Conspiracy.class)
+            .using(Conspiracy::getName)
+            .where(Conspiracy::getName)
+            .equalTo("nsa")
+            .select(personMapper, this::openConnection);
+
+        assertEquals(smith, person.get());
 
         delete(relationship(Conspiracy.class, Person.class))
             .whereLeft(Conspiracy::getName)
@@ -122,9 +140,6 @@ public class RealExample {
             .equalTo("smith")
             .execute(this::openConnection);
 
-
-        // From Conspiracy.class where Conspiracy.getMembers.contains smith
-        // From relationship(Conspiracy.class, Person.class) where conspiracy.name = nsa and person.name ilike smith
     }
 
 

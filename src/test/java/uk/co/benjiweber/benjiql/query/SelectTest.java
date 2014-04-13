@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.co.benjiweber.benjiql.example.Conspiracy;
 import uk.co.benjiweber.benjiql.example.Person;
 import uk.co.benjiweber.benjiql.results.Mapper;
 
@@ -16,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.co.benjiweber.benjiql.ddl.Create.relationship;
 import static uk.co.benjiweber.benjiql.query.Select.from;
 import static uk.co.benjiweber.benjiql.results.Mapper.mapper;
 
@@ -39,7 +41,33 @@ public class SelectTest {
                 .equalTo(5)
                 .toSql();
 
-        assertEquals("SELECT * FROM person WHERE first_name = ? AND last_name != ? AND last_name LIKE ? AND favourite_number = ?", sql.trim());
+        assertEquals("SELECT * FROM person WHERE person.first_name = ? AND person.last_name != ? AND person.last_name LIKE ? AND person.favourite_number = ?", sql.trim());
+    }
+
+    @Test public void should_allow_joins() {
+        String sql = from(Person.class)
+                .where(Person::getLastName)
+                .equalTo("smith")
+                .join(relationship(Conspiracy.class, Person.class).invert())
+                .using(Person::getFirstName, Person::getLastName)
+                .join(Conspiracy.class)
+                .using(Conspiracy::getName)
+                .where(Conspiracy::getName)
+                .equalTo("nsa")
+                .toSql();
+
+        assertEquals(
+            "SELECT * FROM person " +
+            "JOIN conspiracy_person " +
+            "ON person.first_name = conspiracy_person.person_first_name " +
+            "AND person.last_name = conspiracy_person.person_last_name " +
+            "JOIN conspiracy " +
+            "ON conspiracy_person.conspiracy_name = conspiracy.name " +
+            "WHERE person.last_name = ? " +
+            "AND conspiracy.name = ?",
+
+            sql
+        );
     }
 
     @Test public void should_set_values() throws SQLException {
@@ -111,5 +139,6 @@ public class SelectTest {
         assertEquals("lname", result.get(0).getLastName());
         assertEquals((Integer)9001, result.get(0).getFavouriteNumber());
     }
+
 
 }

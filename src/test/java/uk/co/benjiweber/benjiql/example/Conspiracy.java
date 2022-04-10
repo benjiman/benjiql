@@ -1,11 +1,10 @@
 package uk.co.benjiweber.benjiql.example;
 
-import com.google.common.collect.Sets;
-
+import java.util.HashSet;
 import java.util.Set;
 
 public class Conspiracy {
-    private Set<Person> members = Sets.newHashSet();
+    private Set<Person> members = new HashSet<>();
     private String name;
 
     public Conspiracy() {}

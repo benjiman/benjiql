@@ -1,65 +1,65 @@
 package uk.co.benjiweber.benjiql.util;
 
-import com.google.common.collect.ImmutableMap;
 
 import java.sql.JDBCType;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
+import static java.util.Map.entry;
 import java.util.Map;
 
 public class Conventions {
 
-    private static final Map<Class<?>, String> dbTypes = ImmutableMap.<Class<?>,String>builder()
-        .put(String.class, "text")
-        .put(Integer.class, "integer")
-        .put(Float.class, "double")
-        .put(Double.class, "double")
-        .put(Long.class, "bigint")
-        .put(Character.class, "integer")
-        .put(Byte.class, "integer")
-        .put(int.class, "integer")
-        .put(float.class, "double")
-        .put(double.class, "double")
-        .put(long.class, "bigint")
-        .put(char.class, "integer")
-        .put(byte.class, "integer")
-        .build();
+    private static final Map<Class<?>, String> dbTypes = Map.ofEntries(
+        entry(String.class, "text"),
+        entry(Integer.class, "integer"),
+        entry(Float.class, "double"),
+        entry(Double.class, "double"),
+        entry(Long.class, "bigint"),
+        entry(Character.class, "integer"),
+        entry(Byte.class, "integer"),
+        entry(int.class, "integer"),
+        entry(float.class, "double"),
+        entry(double.class, "double"),
+        entry(long.class, "bigint"),
+        entry(char.class, "integer"),
+        entry(byte.class, "integer")
+    );
 
-    private static final Map<Class<?>, JDBCType> jdbcTypes = ImmutableMap.<Class<?>,JDBCType>builder()
-        .put(String.class, JDBCType.VARCHAR)
-        .put(Integer.class, JDBCType.INTEGER)
-        .put(Float.class, JDBCType.FLOAT)
-        .put(Double.class, JDBCType.DOUBLE)
-        .put(Long.class, JDBCType.BIGINT)
-        .put(Character.class, JDBCType.CHAR)
-        .put(Byte.class, JDBCType.TINYINT)
-        .put(int.class, JDBCType.INTEGER)
-        .put(float.class, JDBCType.FLOAT)
-        .put(double.class, JDBCType.DOUBLE)
-        .put(long.class, JDBCType.BIGINT)
-        .put(char.class, JDBCType.CHAR)
-        .put(byte.class, JDBCType.TINYINT)
-        .build();
+    private static final Map<Class<?>, JDBCType> jdbcTypes = Map.ofEntries(
+        entry(String.class, JDBCType.VARCHAR),
+        entry(Integer.class, JDBCType.INTEGER),
+        entry(Float.class, JDBCType.FLOAT),
+        entry(Double.class, JDBCType.DOUBLE),
+        entry(Long.class, JDBCType.BIGINT),
+        entry(Character.class, JDBCType.CHAR),
+        entry(Byte.class, JDBCType.TINYINT),
+        entry(int.class, JDBCType.INTEGER),
+        entry(float.class, JDBCType.FLOAT),
+        entry(double.class, JDBCType.DOUBLE),
+        entry(long.class, JDBCType.BIGINT),
+        entry(char.class, JDBCType.CHAR),
+        entry(byte.class, JDBCType.TINYINT)
+    );
 
     public interface JdbcSetter<T> {
         public void apply(PreparedStatement stmt, int index, T t) throws SQLException;
     }
-    private static final Map<Class<?>, JdbcSetter> jdbcSetters = ImmutableMap.<Class<?>,JdbcSetter>builder()
-        .put(String.class, (JdbcSetter<String>)PreparedStatement::setString)
-        .put(Integer.class, (JdbcSetter<Integer>)PreparedStatement::setInt)
-        .put(Float.class, (JdbcSetter<Float>)PreparedStatement::setFloat)
-        .put(Double.class, (JdbcSetter<Double>) PreparedStatement::setDouble)
-        .put(Long.class, (JdbcSetter<Long>)PreparedStatement::setLong)
-        .put(Character.class, (JdbcSetter<Integer>)PreparedStatement::setInt)
-        .put(Byte.class, (JdbcSetter<Integer>)PreparedStatement::setInt)
-        .put(int.class, (JdbcSetter<Integer>)PreparedStatement::setInt)
-        .put(float.class, (JdbcSetter<Float>)PreparedStatement::setFloat)
-        .put(double.class, (JdbcSetter<Double>)PreparedStatement::setDouble)
-        .put(long.class, (JdbcSetter<Long>)PreparedStatement::setLong)
-        .put(char.class, (JdbcSetter<Integer>)PreparedStatement::setInt)
-        .put(byte.class, (JdbcSetter<Integer>)PreparedStatement::setInt)
-        .build();
+    private static final Map<Class<?>, JdbcSetter> jdbcSetters = Map.ofEntries(
+        entry(String.class, (JdbcSetter<String>)PreparedStatement::setString),
+        entry(Integer.class, (JdbcSetter<Integer>)PreparedStatement::setInt),
+        entry(Float.class, (JdbcSetter<Float>)PreparedStatement::setFloat),
+        entry(Double.class, (JdbcSetter<Double>) PreparedStatement::setDouble),
+        entry(Long.class, (JdbcSetter<Long>)PreparedStatement::setLong),
+        entry(Character.class, (JdbcSetter<Integer>)PreparedStatement::setInt),
+        entry(Byte.class, (JdbcSetter<Integer>)PreparedStatement::setInt),
+        entry(int.class, (JdbcSetter<Integer>)PreparedStatement::setInt),
+        entry(float.class, (JdbcSetter<Float>)PreparedStatement::setFloat),
+        entry(double.class, (JdbcSetter<Double>)PreparedStatement::setDouble),
+        entry(long.class, (JdbcSetter<Long>)PreparedStatement::setLong),
+        entry(char.class, (JdbcSetter<Integer>)PreparedStatement::setInt),
+        entry(byte.class, (JdbcSetter<Integer>)PreparedStatement::setInt)
+    );
 
     public static String toDbName(String name) {
         return uncapitalize(toSnakeCase(banishGetterSetters(name)));

@@ -1,6 +1,5 @@
 package uk.co.benjiweber.benjiql.update;
 
-import com.google.common.base.Joiner;
 import uk.co.benjiweber.benjiql.mocking.Recorder;
 import uk.co.benjiweber.benjiql.mocking.RecordingObject;
 import uk.co.benjiweber.benjiql.util.Conventions;
@@ -51,8 +50,8 @@ public class InsertRelationship<T,U>  {
         List<FieldNameValue> setFieldNames = Stream.concat(leftFieldNames.stream(), rightFieldNames.stream()).collect(Collectors.toList());
 
         return "INSERT INTO " + Conventions.toDbName(leftValue.getClass().getSimpleName() + rightValue.getClass().getSimpleName())
-                + " (" + Joiner.on(", ").join(setFieldNames.stream().map(fnv -> fnv.fieldName).collect(Collectors.toList())) + ") "
-                + "VALUES ( " + Joiner.on(", ").join(setFieldNames.stream().map(fnv -> "?").collect(Collectors.toList())) + " )";
+                + " (" + setFieldNames.stream().map(fnv -> fnv.fieldName).collect(Collectors.joining(", ")) + ") "
+                + "VALUES ( " + setFieldNames.stream().map(fnv -> "?").collect(Collectors.joining(", ")) + " )";
 
     }
 

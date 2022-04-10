@@ -1,6 +1,5 @@
 package uk.co.benjiweber.benjiql.update;
 
-import com.google.common.base.Joiner;
 import uk.co.benjiweber.benjiql.mocking.Recorder;
 import uk.co.benjiweber.benjiql.mocking.RecordingObject;
 import uk.co.benjiweber.benjiql.util.Conventions;
@@ -33,7 +32,7 @@ public class DeleteFromRelationship<T, U> {
     public String toSql() {
         List<FieldNameValue> whereFieldNames = Stream.concat(leftFieldNames.stream(), rightFieldNames.stream()).collect(Collectors.toList());
         return "DELETE FROM " + Conventions.toDbName(left, right) +
-                (whereFieldNames.size() < 1 ? "" : " WHERE " + Joiner.on(" AND ").join(whereFieldNames.stream().map(fnv -> fnv.fieldName + " " + fnv.operator + " ?").collect(Collectors.toList())));
+                (whereFieldNames.size() < 1 ? "" : " WHERE " + whereFieldNames.stream().map(fnv -> fnv.fieldName + " " + fnv.operator + " ?").collect(Collectors.joining(" AND ")));
     }
 
     public void execute(Supplier<Connection> connectionFactory) throws SQLException {

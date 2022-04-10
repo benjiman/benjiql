@@ -1,6 +1,5 @@
 package uk.co.benjiweber.benjiql.ddl;
 
-import com.google.common.base.Joiner;
 import uk.co.benjiweber.benjiql.util.Conventions;
 import uk.co.benjiweber.benjiql.mocking.Recorder;
 import uk.co.benjiweber.benjiql.mocking.RecordingObject;
@@ -47,7 +46,7 @@ public class Create<T> {
 
     public String toSql() {
         return "CREATE TABLE IF NOT EXISTS " + Conventions.toDbName(cls.getSimpleName()) + " ( " +
-                Joiner.on(", ").join(fieldNames.stream().map(FieldNameType::toString).collect(Collectors.toList()))
+                fieldNames.stream().map(FieldNameType::toString).collect(Collectors.joining(", "))
                         + " ); ";
     }
 

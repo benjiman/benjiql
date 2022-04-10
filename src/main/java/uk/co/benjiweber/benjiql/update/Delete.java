@@ -1,6 +1,5 @@
 package uk.co.benjiweber.benjiql.update;
 
-import com.google.common.base.Joiner;
 import uk.co.benjiweber.benjiql.ddl.JoinTables;
 import uk.co.benjiweber.benjiql.util.Conventions;
 import uk.co.benjiweber.benjiql.mocking.Recorder;
@@ -60,7 +59,7 @@ public class Delete<T> {
 
     public String toSql() {
         return "DELETE FROM " + Conventions.toDbName(cls.getSimpleName()) +
-            (whereFieldNames.size() < 1 ? "" : " WHERE " + Joiner.on(" AND ").join(whereFieldNames.stream().map(fnv -> fnv.fieldName + " " + fnv.operator + " ?").collect(Collectors.toList())));
+            (whereFieldNames.size() < 1 ? "" : " WHERE " + whereFieldNames.stream().map(fnv -> fnv.fieldName + " " + fnv.operator + " ?").collect(Collectors.joining(" AND ")));
     }
 
     public void execute(Supplier<Connection> connectionFactory) throws SQLException {

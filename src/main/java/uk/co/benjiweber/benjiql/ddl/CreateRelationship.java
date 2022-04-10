@@ -1,6 +1,5 @@
 package uk.co.benjiweber.benjiql.ddl;
 
-import com.google.common.base.Joiner;
 import uk.co.benjiweber.benjiql.mocking.Recorder;
 import uk.co.benjiweber.benjiql.ddl.Create.FieldNameType;
 import uk.co.benjiweber.benjiql.mocking.RecordingObject;
@@ -52,7 +51,7 @@ public class CreateRelationship<T,U> {
 
     public String toSql() {
         return "CREATE TABLE IF NOT EXISTS " + Conventions.toDbName(left.getSimpleName() + right.getSimpleName())  + " ( " +
-                Joiner.on(", ").join(Stream.concat(leftFieldNames.stream(), rightFieldNames.stream()).map(FieldNameType::toString).collect(Collectors.toList())) +
+                Stream.concat(leftFieldNames.stream(), rightFieldNames.stream()).map(FieldNameType::toString).collect(Collectors.joining(", ")) +
                 " ); ";
     }
 

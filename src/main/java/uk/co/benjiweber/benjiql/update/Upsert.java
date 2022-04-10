@@ -1,6 +1,5 @@
 package uk.co.benjiweber.benjiql.update;
 
-import com.google.common.base.Joiner;
 import uk.co.benjiweber.benjiql.util.Conventions;
 import uk.co.benjiweber.benjiql.mocking.Recorder;
 import uk.co.benjiweber.benjiql.mocking.RecordingObject;
@@ -28,8 +27,8 @@ public abstract class Upsert<T> {
         @Override
         public String toSql() {
             return "INSERT INTO " + Conventions.toDbName(value.getClass().getSimpleName())
-                    + " (" + Joiner.on(", ").join(setFieldNames.stream().map(fnv -> fnv.fieldName).collect(Collectors.toList())) + ") "
-                    + "VALUES ( " + Joiner.on(", ").join(setFieldNames.stream().map(fnv -> "?").collect(Collectors.toList())) + " )";
+                    + " (" + setFieldNames.stream().map(fnv -> fnv.fieldName).collect(Collectors.joining(", ")) + ") "
+                    + "VALUES ( " + setFieldNames.stream().map(fnv -> "?").collect(Collectors.joining(", ")) + " )";
         }
     }
 
@@ -41,8 +40,8 @@ public abstract class Upsert<T> {
         @Override
         public String toSql() {
             return "UPDATE " + Conventions.toDbName(value.getClass().getSimpleName())
-                    + " SET " + Joiner.on(", ").join(setFieldNames.stream().map(fnv -> fnv.fieldName + " = ?").collect(Collectors.toList()))
-                    + ((whereFieldNames.size() < 1) ? "" : " WHERE " + Joiner.on(" AND ").join(whereFieldNames.stream().map(fnv -> fnv.fieldName + " " + fnv.operator + " ?").collect(Collectors.toList())));
+                    + " SET " + setFieldNames.stream().map(fnv -> fnv.fieldName + " = ?").collect(Collectors.joining(", "))
+                    + ((whereFieldNames.size() < 1) ? "" : " WHERE " + whereFieldNames.stream().map(fnv -> fnv.fieldName + " " + fnv.operator + " ?").collect(Collectors.joining(" AND ")));
         }
     }
 

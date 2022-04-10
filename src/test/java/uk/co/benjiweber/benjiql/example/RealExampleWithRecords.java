@@ -1,14 +1,16 @@
 package uk.co.benjiweber.benjiql.example;
 
 import org.junit.Test;
-import uk.co.benjiweber.benjiql.results.ClassMapper;
 import uk.co.benjiweber.benjiql.results.Mapper;
+import uk.co.benjiweber.benjiql.results.RecordMapper;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static uk.co.benjiweber.benjiql.ddl.Create.create;
@@ -18,69 +20,71 @@ import static uk.co.benjiweber.benjiql.update.Delete.delete;
 import static uk.co.benjiweber.benjiql.update.Upsert.insert;
 import static uk.co.benjiweber.benjiql.update.Upsert.update;
 
-public class RealExample {
+public class RealExampleWithRecords {
+    public record Person (String firstName, String lastName, Integer favouriteNumber) {}
+    public record Conspiracy (Set<Person> members, String name) {
+        public Conspiracy(String name) {
+            this(new HashSet<>(), name);
+        }
+    }
 
     @Test public void example_of_create_table_persist_retrieve_and_update_with_real_database() throws SQLException {
         create(Person.class)
-            .field(Person::getFirstName)
-            .field(Person::getLastName)
-            .field(Person::getFavouriteNumber)
+            .field(Person::firstName)
+            .field(Person::lastName)
+            .field(Person::favouriteNumber)
             .execute(this::openConnection);
 
         delete(Person.class)
-            .where(Person::getLastName)
+            .where(Person::lastName)
             .equalTo("weber")
             .execute(this::openConnection);
 
-        Person benji = new Person("benji","weber");
-        benji.setFavouriteNumber(9);
+        Person benji = new Person("benji","weber",9);
 
         insert(benji)
-            .value(Person::getFirstName)
-            .value(Person::getLastName)
-            .value(Person::getFavouriteNumber)
+            .value(Person::firstName)
+            .value(Person::lastName)
+            .value(Person::favouriteNumber)
             .execute(this::openConnection);
 
-        benji.setFirstName("benji-updated");
+        benji = new Person("benji-updated", "weber", 9);
 
         update(benji)
-            .value(Person::getFirstName)
-            .where(Person::getLastName)
+            .value(Person::firstName)
+            .where(Person::lastName)
             .equalTo("weber")
             .execute(this::openConnection);
 
-        Mapper<Person> personMapper = ClassMapper.mapper(Person::new)
-            .set(Person::setFirstName)
-            .set(Person::setLastName)
-            .set(Person::setFavouriteNumber);
+        Mapper<Person> personMapper = new RecordMapper<>(Person.class);
 
         Optional<Person> result = from(Person.class)
-            .where(Person::getFirstName)
+            .where(Person::firstName)
             .like("%updated")
-            .and(Person::getLastName)
+            .and(Person::lastName)
             .equalTo("weber")
             .select(personMapper, this::openConnection);
 
-        assertEquals("benji-updated", result.get().getFirstName());
-        assertEquals("weber", result.get().getLastName());
-        assertEquals((Integer)9, result.get().getFavouriteNumber());
+        assertEquals("benji-updated", result.get().firstName());
+        assertEquals("weber", result.get().lastName());
+        assertEquals((Integer)9, result.get().favouriteNumber());
     }
 
     @Test public void example_of_select_with_join() throws SQLException {
         create(Person.class)
-            .field(Person::getFirstName)
-            .field(Person::getLastName)
-            .field(Person::getFavouriteNumber)
+            .field(Person::firstName)
+            .field(Person::lastName)
+            .field(Person::favouriteNumber)
             .execute(this::openConnection);
 
         create(Conspiracy.class)
-            .field(Conspiracy::getName)
+            .field(Conspiracy::name)
             .execute(this::openConnection);
 
         create(relationship(Conspiracy.class, Person.class))
-            .fieldLeft(Conspiracy::getName)
-            .fieldRight(Person::getFirstName)
-            .fieldRight(Person::getLastName)
+            .fieldLeft(Conspiracy::name)
+            .fieldRight(Person::firstName)
+            .fieldRight(Person::lastName)
             .execute(this::openConnection);
 
         delete(Person.class)
@@ -92,52 +96,48 @@ public class RealExample {
         delete(relationship(Conspiracy.class, Person.class))
             .execute(this::openConnection);
 
-        Person smith = new Person("agent","smith");
-        smith.setFavouriteNumber(6);
+        Person smith = new Person("agent","smith", 6);
 
         insert(smith)
-            .value(Person::getFirstName)
-            .value(Person::getLastName)
-            .value(Person::getFavouriteNumber)
+            .value(Person::firstName)
+            .value(Person::lastName)
+            .value(Person::favouriteNumber)
             .execute(this::openConnection);
 
         Conspiracy nsa = new Conspiracy("nsa");
-        nsa.getMembers().add(smith);
+        nsa.members().add(smith);
 
         insert(nsa)
-            .value(Conspiracy::getName)
+            .value(Conspiracy::name)
             .execute(this::openConnection);
 
-        nsa.getMembers().forEach(agent -> {
+        nsa.members().forEach(agent -> {
             insert(nsa, agent)
-                    .valueLeft(Conspiracy::getName)
-                    .valueRight(Person::getLastName)
-                    .valueRight(Person::getFirstName)
+                    .valueLeft(Conspiracy::name)
+                    .valueRight(Person::lastName)
+                    .valueRight(Person::firstName)
                     .execute(this::openConnection);
         });
 
-        Mapper<Person> personMapper = ClassMapper.mapper(Person::new)
-            .set(Person::setFirstName)
-            .set(Person::setLastName)
-            .set(Person::setFavouriteNumber);
+        Mapper<Person> personMapper = new RecordMapper<>(Person.class);
 
         Optional<Person> person = from(Person.class)
-            .where(Person::getLastName)
+            .where(Person::lastName)
             .equalTo("smith")
             .join(relationship(Conspiracy.class, Person.class).invert())
-            .using(Person::getFirstName, Person::getLastName)
+            .using(Person::firstName, Person::lastName)
             .join(Conspiracy.class)
-            .using(Conspiracy::getName)
-            .where(Conspiracy::getName)
+            .using(Conspiracy::name)
+            .where(Conspiracy::name)
             .equalTo("nsa")
             .select(personMapper, this::openConnection);
 
         assertEquals(smith, person.get());
 
         delete(relationship(Conspiracy.class, Person.class))
-            .whereLeft(Conspiracy::getName)
+            .whereLeft(Conspiracy::name)
             .equalTo("nsa")
-            .andRight(Person::getLastName)
+            .andRight(Person::lastName)
             .equalTo("smith")
             .execute(this::openConnection);
 

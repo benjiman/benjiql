@@ -1,17 +1,19 @@
 package uk.co.benjiweber.benjiql.query;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.co.benjiweber.benjiql.example.Conspiracy;
-import uk.co.benjiweber.benjiql.example.Person;
 import uk.co.benjiweber.benjiql.results.Mapper;
+import uk.co.benjiweber.benjiql.results.RecordMapper;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,25 +21,28 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.co.benjiweber.benjiql.ddl.Create.relationship;
 import static uk.co.benjiweber.benjiql.query.Select.from;
-import static uk.co.benjiweber.benjiql.results.ClassMapper.mapper;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SelectTest {
+public class SelectRecordTest {
+
+    public record Person (String firstName, String lastName, Integer favouriteNumber) {}
+    public record Conspiracy (Set<Person> members, String name) {}
+
 
     @Mock Connection mockConnection;
     @Mock PreparedStatement mockStatement;
     @Mock ResultSet mockResults;
-    Mapper<Person> personMapper = mapper(Person::new).set(Person::setFirstName).set(Person::setLastName).set(Person::setFavouriteNumber);
+    Mapper<Person> personMapper = new RecordMapper<Person>(Person.class);
 
     @Test public void should_match_example() {
         String sql = from(Person.class)
-                .where(Person::getFirstName)
+                .where(Person::firstName)
                 .equalTo("benji")
-                .and(Person::getLastName)
+                .and(Person::lastName)
                 .notEqualTo("foo")
-                .and(Person::getLastName)
+                .and(Person::lastName)
                 .like("web%")
-                .and(Person::getFavouriteNumber)
+                .and(Person::favouriteNumber)
                 .equalTo(5)
                 .toSql();
 
@@ -46,13 +51,13 @@ public class SelectTest {
 
     @Test public void should_allow_joins() {
         String sql = from(Person.class)
-                .where(Person::getLastName)
+                .where(Person::lastName)
                 .equalTo("smith")
                 .join(relationship(Conspiracy.class, Person.class).invert())
-                .using(Person::getFirstName, Person::getLastName)
+                .using(Person::firstName, Person::lastName)
                 .join(Conspiracy.class)
-                .using(Conspiracy::getName)
-                .where(Conspiracy::getName)
+                .using(Conspiracy::name)
+                .where(Conspiracy::name)
                 .equalTo("nsa")
                 .toSql();
 
@@ -75,13 +80,13 @@ public class SelectTest {
         when(mockStatement.executeQuery()).thenReturn(mockResults);
 
         Optional<Person> result = from(Person.class)
-                .where(Person::getFirstName)
+                .where(Person::firstName)
                 .equalTo("benji")
-                .and(Person::getLastName)
+                .and(Person::lastName)
                 .notEqualTo("foo")
-                .and(Person::getLastName)
+                .and(Person::lastName)
                 .like("web%")
-                .and(Person::getFavouriteNumber)
+                .and(Person::favouriteNumber)
                 .equalTo(5)
                 .select(personMapper, () -> mockConnection);
 
@@ -100,19 +105,19 @@ public class SelectTest {
         when(mockResults.getObject("favourite_number")).thenReturn(9001);
 
         Optional<Person> result = from(Person.class)
-                .where(Person::getFirstName)
+                .where(Person::firstName)
                 .equalTo("benji")
-                .and(Person::getLastName)
+                .and(Person::lastName)
                 .notEqualTo("foo")
-                .and(Person::getLastName)
+                .and(Person::lastName)
                 .like("web%")
-                .and(Person::getFavouriteNumber)
+                .and(Person::favouriteNumber)
                 .equalTo(5)
                 .select(personMapper, () -> mockConnection);
 
-        assertEquals("fname", result.get().getFirstName());
-        assertEquals("lname", result.get().getLastName());
-        assertEquals((Integer)9001, result.get().getFavouriteNumber());
+        assertEquals("fname", result.get().firstName());
+        assertEquals("lname", result.get().lastName());
+        assertEquals((Integer)9001, result.get().favouriteNumber());
     }
 
     @Test public void should_map_results_list() throws SQLException {
@@ -124,20 +129,20 @@ public class SelectTest {
         when(mockResults.getObject("favourite_number")).thenReturn(9001);
 
         List<Person> result = from(Person.class)
-                .where(Person::getFirstName)
+                .where(Person::firstName)
                 .equalTo("benji")
-                .and(Person::getLastName)
+                .and(Person::lastName)
                 .notEqualTo("foo")
-                .and(Person::getLastName)
+                .and(Person::lastName)
                 .like("web%")
-                .and(Person::getFavouriteNumber)
+                .and(Person::favouriteNumber)
                 .equalTo(5)
                 .list(personMapper, () -> mockConnection);
 
         assertEquals(1, result.size());
-        assertEquals("fname", result.get(0).getFirstName());
-        assertEquals("lname", result.get(0).getLastName());
-        assertEquals((Integer)9001, result.get(0).getFavouriteNumber());
+        assertEquals("fname", result.get(0).firstName());
+        assertEquals("lname", result.get(0).lastName());
+        assertEquals((Integer)9001, result.get(0).favouriteNumber());
     }
 
 

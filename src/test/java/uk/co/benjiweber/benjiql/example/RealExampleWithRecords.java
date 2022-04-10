@@ -16,6 +16,7 @@ import static org.junit.Assert.assertEquals;
 import static uk.co.benjiweber.benjiql.ddl.Create.create;
 import static uk.co.benjiweber.benjiql.ddl.Create.relationship;
 import static uk.co.benjiweber.benjiql.query.Select.from;
+import static uk.co.benjiweber.benjiql.results.RecordMapper.mapper;
 import static uk.co.benjiweber.benjiql.update.Delete.delete;
 import static uk.co.benjiweber.benjiql.update.Upsert.insert;
 import static uk.co.benjiweber.benjiql.update.Upsert.update;
@@ -56,14 +57,12 @@ public class RealExampleWithRecords {
             .equalTo("weber")
             .execute(this::openConnection);
 
-        Mapper<Person> personMapper = new RecordMapper<>(Person.class);
-
         Optional<Person> result = from(Person.class)
             .where(Person::firstName)
             .like("%updated")
             .and(Person::lastName)
             .equalTo("weber")
-            .select(personMapper, this::openConnection);
+            .select(mapper(Person.class), this::openConnection);
 
         assertEquals("benji-updated", result.get().firstName());
         assertEquals("weber", result.get().lastName());
@@ -119,8 +118,6 @@ public class RealExampleWithRecords {
                     .execute(this::openConnection);
         });
 
-        Mapper<Person> personMapper = new RecordMapper<>(Person.class);
-
         Optional<Person> person = from(Person.class)
             .where(Person::lastName)
             .equalTo("smith")
@@ -130,7 +127,7 @@ public class RealExampleWithRecords {
             .using(Conspiracy::name)
             .where(Conspiracy::name)
             .equalTo("nsa")
-            .select(personMapper, this::openConnection);
+            .select(mapper(Person.class), this::openConnection);
 
         assertEquals(smith, person.get());
 

@@ -26,6 +26,10 @@ public class RecordMapper<T extends Record> implements Mapper<T> {
         this.properties = List.of(recordType.getRecordComponents());
     }
 
+    public static <T extends Record> RecordMapper<T> mapper(Class<T> cls) {
+        return new RecordMapper<>(cls);
+    }
+
     public T map(ResultSet resultSet) {
         Set<Map.Entry<?,?>> constructorParams = new HashSet<>();
 
